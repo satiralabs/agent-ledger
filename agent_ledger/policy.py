@@ -21,6 +21,9 @@ _COST_FIELDS = ("cost_usd", "cost", "amount_usd", "price_usd", "usd")
 def _normalise(text: str) -> str:
     text = unicodedata.normalize("NFKC", str(text))
     text = text.replace("​", "").replace("﻿", "")
+    # Unescape literal escape sequences (JSON/repr forms of tab/newline) so
+    # "rm\t-rf" in an escaped payload cannot slip past pattern matching.
+    text = text.replace("\\t", " ").replace("\\n", " ").replace("\\r", " ")
     text = re.sub(r"\s+", " ", text)
     return text.strip().lower()
 
