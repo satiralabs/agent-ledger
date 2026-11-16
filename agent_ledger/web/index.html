@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgentLedger</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<header class="topbar">
+  <img src="/logo.svg" alt="" class="logo">
+  <span class="brand">AgentLedger</span>
+  <span id="chainPill" class="pill pill-ok" title="Chain status from the last verification">…</span>
+  <nav class="tabs" id="tabs">
+    <button data-screen="dashboard" class="tab active">Dashboard</button>
+    <button data-screen="ledger" class="tab">Ledger</button>
+    <button data-screen="verify" class="tab">Verify</button>
+    <button data-screen="receipts" class="tab">Receipts</button>
+    <button data-screen="policy" class="tab">Policy</button>
+  </nav>
+</header>
+
+<main>
+  <!-- Dashboard -->
+  <section class="screen active" id="screen-dashboard">
+    <h1>Dashboard</h1>
+    <p class="sub">What your agents did, chained and signed.</p>
+    <div class="tiles">
+      <div class="tile"><span class="tile-num" id="statBlocks">–</span><span class="tile-label">Blocks</span></div>
+      <div class="tile"><span class="tile-num" id="statAgents">–</span><span class="tile-label">Agents</span></div>
+      <div class="tile"><span class="tile-num" id="statChain">–</span><span class="tile-label">Chain</span></div>
+      <div class="tile"><span class="tile-num small" id="statLast">–</span><span class="tile-label">Last block</span></div>
+    </div>
+    <div class="panel">
+      <h2>Log an action</h2>
+      <form id="logForm">
+        <label>Agent <input name="agent" required placeholder="coder-01"></label>
+        <label>Tool <input name="tool" required placeholder="bash"></label>
+        <label>Parameters (JSON) <textarea name="params" rows="2" placeholder='{"cmd": "git status"}'></textarea></label>
+        <details><summary>More options</summary>
+          <label>Result (JSON) <textarea name="result" rows="2" placeholder='{"ok": true}'></textarea></label>
+          <label class="check"><input type="checkbox" name="approve"> Approve if policy asks</label>
+        </details>
+        <button class="primary" type="submit">Log action</button>
+        <p class="msg" id="logMsg"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- Ledger -->
+  <section class="screen" id="screen-ledger">
+    <h1>Ledger</h1>
+    <p class="sub">Every block, newest first.</p>
+    <form id="filterForm" class="filters">
+      <label>Agent <input name="agent" placeholder="all"></label>
+      <label>Action <input name="action" placeholder="all"></label>
+      <button class="primary" type="submit">Filter</button>
+    </form>
+    <div id="blockList"></div>
+  </section>
+
+  <!-- Verify -->
+  <section class="screen" id="screen-verify">
+    <h1>Verify</h1>
+    <p class="sub">Check the whole chain in one click.</p>
+    <div class="tile wide"><span class="tile-num" id="verifyStatus">–</span><span class="tile-label" id="verifyDetail">Not checked yet</span></div>
+    <div class="panel">
+      <p class="rowline"><span class="k">Merkle root</span> <code id="merkleRoot" title="">–</code></p>
+      <button class="primary" id="verifyBtn" type="button">Verify now</button>
+    </div>
+  </section>
+
+  <!-- Receipts -->
+  <section class="screen" id="screen-receipts">
+    <h1>Receipts</h1>
+    <p class="sub">Signed proof of one prompt, one tool, one result.</p>
+    <div class="panel">
+      <h2>New receipt</h2>
+      <form id="receiptForm">
+        <label>Agent <input name="agent" required placeholder="researcher-02"></label>
+        <label>Prompt <input name="prompt" required placeholder="Summarise the accounts"></label>
+        <label>Tool <input name="tool" required placeholder="sql_query"></label>
+        <details><summary>More options</summary>
+          <label>Model <input name="model" placeholder="claude-3-5-sonnet"></label>
+          <label>Parameters (JSON) <textarea name="params" rows="2" placeholder="{}"></textarea></label>
+          <label>Result (JSON) <textarea name="result" rows="2" placeholder="{}"></textarea></label>
+          <label class="check"><input type="checkbox" name="append" checked> Append to ledger</label>
+        </details>
+        <button class="primary" type="submit">Create receipt</button>
+        <pre class="msg" id="receiptMsg"></pre>
+      </form>
+    </div>
+    <div id="receiptList"></div>
+  </section>
+
+  <!-- Policy -->
+  <section class="screen" id="screen-policy">
+    <h1>Policy</h1>
+    <p class="sub">What is allowed, what needs approval, what is blocked.</p>
+    <div class="panel" id="policyRules"></div>
+    <div class="panel">
+      <h2>Test a tool call</h2>
+      <form id="policyForm">
+        <label>Tool <input name="tool" required placeholder="bash"></label>
+        <label>Parameters (JSON) <textarea name="params" rows="2" placeholder='{"cmd": "git status"}'></textarea></label>
+        <button class="primary" type="submit">Check</button>
+        <p class="msg" id="policyMsg"></p>
+      </form>
+    </div>
+  </section>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

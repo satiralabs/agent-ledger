@@ -93,13 +93,28 @@ class PolicyRule:
                 f"Cost ${cost:.2f} exceeds policy limit ${self.max_cost_usd:.2f}; human approval required"
             )
 
-        # 4. High-risk approval gate — tool name AND params
+        # 4. High-risk approval gate — tool name AND params.
+        # Params use whole-token matching: a plain substring scan flags
+        # innocent words ("format" contains "rm"), which the seed demo
+        # proved in practice. The tool name keeps substring matching
+        # ("sudo_bash" should trip "sudo").
+        param_tokens = set(re.findall(r"[a-z0-9]+", param_text))
         for trigger in self.require_approval_for:
             trig_n = _normalise(trigger)
-            if trig_n and (trig_n in tool_n or trig_n in param_text):
-                where = "tool name" if trig_n in tool_n else "parameters"
+            if not trig_n:
+                continue
+            if trig_n in tool_n:
                 return False, "APPROVAL_REQUIRED", (
-                    f"Action touches sensitive domain ({trigger}) in {where}; human approval required"
+                    f"Action touches sensitive domain ({trigger}) in tool name; human approval required"
+                )
+            trig_tokens = re.findall(r"[a-z0-9]+", trig_n)
+            if len(trig_tokens) == 1 and trig_tokens[0] in param_tokens:
+                return False, "APPROVAL_REQUIRED", (
+                    f"Action touches sensitive domain ({trigger}) in parameters; human approval required"
+                )
+            if len(trig_tokens) > 1 and trig_n in param_text:
+                return False, "APPROVAL_REQUIRED", (
+                    f"Action touches sensitive domain ({trigger}) in parameters; human approval required"
                 )
 
         return True, "PASS", "Action authorized under policy"
